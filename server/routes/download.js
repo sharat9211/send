@@ -13,7 +13,7 @@ module.exports = async function(req, res) {
       'Content-Length': contentLength,
       'WWW-Authenticate': `send-v1 ${req.nonce}`
     });
-    const file_stream = storage.get(id);
+    const file_stream = await storage.get(id);
 
     file_stream.on('end', async () => {
       const dl = meta.dl + 1;

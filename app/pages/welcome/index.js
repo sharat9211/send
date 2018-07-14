@@ -4,6 +4,8 @@ const assets = require('../../../common/assets');
 const fileList = require('../../templates/fileList');
 const { bytes, fadeOut } = require('../../utils');
 
+//const selectbox = require('../../templates/selectbox');
+
 module.exports = function(state, emit) {
   // the page flickers if both the server and browser set 'effect--fadeIn'
   const fade = state.layout ? '' : 'effect--fadeIn';
@@ -46,6 +48,23 @@ module.exports = function(state, emit) {
     ${fileList(state, emit)}
   </div>
   `;
+
+  /*
+  function timeInfo() { //temporary UI hack for testing time limits
+    const timeOptions = [300, 3600, 86400, 604800, 1209600];
+    const displayText = {
+      300: '5 minutes',
+      3600: '1 hour',
+      86400: '24 hours',
+      604800: '1 week',
+      1209600: '2 weeks'
+    };
+    const display = num => displayText[num];
+    const changeFn = value => (emit('changeTimeLimit', {value}));
+    const box = selectbox(timeOptions[2], timeOptions, display, changeFn);
+    return box;
+  }
+  */
 
   function dragover(event) {
     const div = document.querySelector('.uploadArea');

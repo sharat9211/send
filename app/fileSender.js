@@ -1,4 +1,4 @@
-/* global EXPIRE_SECONDS */
+/* global DEFAULT_EXPIRE_SECONDS */
 import Nanobus from 'nanobus';
 import OwnedFile from './ownedFile';
 import Keychain from './keychain';
@@ -6,8 +6,9 @@ import { arrayToB64, bytes } from './utils';
 import { uploadWs } from './api';
 
 export default class FileSender extends Nanobus {
-  constructor(file) {
+  constructor(file, timeLimit) {
     super('FileSender');
+    this.timeLimit = timeLimit || DEFAULT_EXPIRE_SECONDS;
     this.file = file;
     this.keychain = new Keychain();
     this.reset();
@@ -77,7 +78,8 @@ export default class FileSender extends Nanobus {
       p => {
         this.progress = p;
         this.emit('progress');
-      }
+      },
+      this.timeLimit
     );
 
     if (this.cancelled) {
@@ -101,7 +103,7 @@ export default class FileSender extends Nanobus {
         time: time,
         speed: this.file.size / (time / 1000),
         createdAt: Date.now(),
-        expiresAt: Date.now() + EXPIRE_SECONDS * 1000,
+        expiresAt: Date.now() + this.timeLimit * 1000,
         secretKey: secretKey,
         nonce: this.keychain.nonce,
         ownerToken: result.ownerToken

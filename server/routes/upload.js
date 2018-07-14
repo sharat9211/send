@@ -24,7 +24,7 @@ module.exports = async function(req, res) {
   try {
     const limiter = new Limiter(config.max_file_size);
     const fileStream = req.pipe(limiter);
-    await storage.set(newId, fileStream, meta);
+    await storage.set(newId, fileStream, meta, config.default_expire_seconds);
     const protocol = config.env === 'production' ? 'https' : req.protocol;
     const url = `${protocol}://${req.get('host')}/download/${newId}/`;
     res.set('WWW-Authenticate', `send-v1 ${meta.nonce}`);

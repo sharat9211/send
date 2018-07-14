@@ -129,6 +129,7 @@ async function upload(
   streamInfo,
   metadata,
   verifierB64,
+  timeLimit,
   onprogress,
   canceller
 ) {
@@ -141,7 +142,8 @@ async function upload(
     const metadataHeader = arrayToB64(new Uint8Array(metadata));
     const fileMeta = {
       fileMetadata: metadataHeader,
-      authorization: `send-v1 ${verifierB64}`
+      authorization: `send-v1 ${verifierB64}`,
+      timeLimit
     };
 
     const responsePromise = listenForResponse(ws, canceller);
@@ -178,7 +180,14 @@ async function upload(
   }
 }
 
-export function uploadWs(encrypted, info, metadata, verifierB64, onprogress) {
+export function uploadWs(
+  encrypted,
+  info,
+  metadata,
+  verifierB64,
+  onprogress,
+  timeLimit
+) {
   const canceller = { cancelled: false };
 
   return {
@@ -191,6 +200,7 @@ export function uploadWs(encrypted, info, metadata, verifierB64, onprogress) {
       info,
       metadata,
       verifierB64,
+      timeLimit,
       onprogress,
       canceller
     )

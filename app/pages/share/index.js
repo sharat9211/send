@@ -1,4 +1,4 @@
-/* global EXPIRE_SECONDS */
+/* global DEFAULT_EXPIRE_SECONDS */
 const html = require('choo/html');
 const raw = require('choo/html/raw');
 const assets = require('../../../common/assets');
@@ -96,7 +96,7 @@ module.exports = function(state, emit) {
 };
 
 function expireInfo(file, translate, emit) {
-  const hours = Math.floor(EXPIRE_SECONDS / 60 / 60);
+  const hours = Math.floor(DEFAULT_EXPIRE_SECONDS / 60 / 60);
   const el = html`<div class="title">${raw(
     translate('expireInfo', {
       downloadCount: '<select></select>',

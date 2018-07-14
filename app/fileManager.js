@@ -1,3 +1,5 @@
+/* global DEFAULT_EXPIRE_SECONDS */
+
 import FileSender from './fileSender';
 import FileReceiver from './fileReceiver';
 import {
@@ -10,6 +12,7 @@ import {
 import * as metrics from './metrics';
 
 export default function(state, emitter) {
+  let timeLimit = DEFAULT_EXPIRE_SECONDS;
   let lastRender = 0;
   let updateTitle = false;
 
@@ -64,6 +67,10 @@ export default function(state, emitter) {
     metrics.changedDownloadLimit(file);
   });
 
+  emitter.on('changeTimeLimit', async ({ value }) => {
+    timeLimit = value;
+  });
+
   emitter.on('delete', async ({ file, location }) => {
     try {
       metrics.deletedUpload({
@@ -87,7 +94,7 @@ export default function(state, emitter) {
 
   emitter.on('upload', async ({ file, type }) => {
     const size = file.size;
-    const sender = new FileSender(file);
+    const sender = new FileSender(file, timeLimit);
     sender.on('progress', updateProgress);
     sender.on('encrypting', render);
     state.transfer = sender;
