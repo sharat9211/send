@@ -47,6 +47,7 @@ export default function(state, emitter) {
   }
 
   emitter.on('DOMContentLoaded', () => {
+    timeLimit = DEFAULT_EXPIRE_SECONDS;
     document.addEventListener('blur', () => (updateTitle = true));
     document.addEventListener('focus', () => {
       updateTitle = false;

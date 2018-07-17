@@ -4,7 +4,7 @@ const assets = require('../../../common/assets');
 const fileList = require('../../templates/fileList');
 const { bytes, fadeOut } = require('../../utils');
 
-//const selectbox = require('../../templates/selectbox');
+const selectbox = require('../../templates/selectbox');
 
 module.exports = function(state, emit) {
   // the page flickers if both the server and browser set 'effect--fadeIn'
@@ -19,6 +19,7 @@ module.exports = function(state, emit) {
         class="link">
         ${state.translate('uploadPageLearnMore')}
       </a>
+      ${timeInfo()}
     </div>
     <div class="uploadArea"
       ondragover=${dragover}
@@ -49,8 +50,8 @@ module.exports = function(state, emit) {
   </div>
   `;
 
-  /*
-  function timeInfo() { //temporary UI hack for testing time limits
+  function timeInfo() {
+    //temporary UI hack for testing time limits
     const timeOptions = [300, 3600, 86400, 604800, 1209600];
     const displayText = {
       300: '5 minutes',
@@ -60,11 +61,10 @@ module.exports = function(state, emit) {
       1209600: '2 weeks'
     };
     const display = num => displayText[num];
-    const changeFn = value => (emit('changeTimeLimit', {value}));
+    const changeFn = value => emit('changeTimeLimit', { value });
     const box = selectbox(timeOptions[2], timeOptions, display, changeFn);
     return box;
   }
-  */
 
   function dragover(event) {
     const div = document.querySelector('.uploadArea');

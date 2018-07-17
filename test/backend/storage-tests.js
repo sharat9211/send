@@ -1,6 +1,5 @@
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
-const conf = require('../../server/config.js');
 
 const stream = {};
 class MockStorage {
@@ -21,16 +20,17 @@ class MockStorage {
   }
 }
 
-const expire_seconds = 10;
+const config = {
+  default_expire_seconds: 10,
+  num_of_buckets: 3,
+  expire_times_seconds: [86400, 604800, 1209600],
+  s3_buckets: ['foo', 'bar', 'baz'],
+  env: 'development',
+  redis_host: 'localhost'
+};
+
 const storage = proxyquire('../../server/storage', {
-  '../config': {
-    default_expire_seconds: expire_seconds,
-    num_of_buckets: conf.num_of_buckets,
-    expire_times_seconds: conf.expire_times_seconds,
-    s3_buckets: ['foo', 'bar', 'baz'],
-    env: 'development',
-    redis_host: 'localhost'
-  },
+  '../config': config,
   '../log': () => {},
   './s3': MockStorage
 });
@@ -38,10 +38,11 @@ const storage = proxyquire('../../server/storage', {
 describe('Storage', function() {
   describe('ttl', function() {
     it('returns milliseconds remaining', async function() {
-      await storage.set('x', null, { foo: 'bar' });
+      const time = 40;
+      await storage.set('x', null, { foo: 'bar' }, time);
       const ms = await storage.ttl('x');
       await storage.del('x');
-      assert.equal(ms, expire_seconds * 1000);
+      assert.equal(ms, time * 1000);
     });
   });
 
@@ -71,17 +72,17 @@ describe('Storage', function() {
     });
 
     it('puts into right bucket based on expire time', async function() {
-      await storage.set('x', null, { foo: 'bar' }, 60 * 60 * 24);
-      const bucketX = await storage.getBucket('x');
-      assert.equal(bucketX, 0);
-
-      await storage.set('y', null, { foo: 'bar' }, 60 * 60 * 24 * 7);
-      const bucketY = await storage.getBucket('y');
-      assert.equal(bucketY, 1);
-
-      await storage.set('z', null, { foo: 'bar' }, 60 * 60 * 24 * 14);
-      const bucketZ = await storage.getBucket('z');
-      assert.equal(bucketZ, 2);
+      for (let i = 0; i < config.num_of_buckets; i++) {
+        await storage.set(
+          'x',
+          null,
+          { foo: 'bar' },
+          config.expire_times_seconds[i]
+        );
+        const bucket = await storage.getBucket('x');
+        assert.equal(bucket, i);
+        await storage.del('x');
+      }
     });
 
     it('sets metadata', async function() {
