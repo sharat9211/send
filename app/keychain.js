@@ -173,15 +173,23 @@ export default class Keychain {
           iv: arrayToB64(this.iv),
           name: metadata.name,
           size: metadata.size,
-          type: metadata.type || 'application/octet-stream'
+          type: metadata.type || 'application/octet-stream',
+          manifest: metadata.manifest || {}
         })
       )
     );
     return ciphertext;
   }
 
-  encryptStream(plaintext) {
-    const ece = new ECE(plaintext, this.rawSecret, 'encrypt');
+  encryptStream(plainStream, fileSize) {
+    const ece = new ECE(
+      plainStream,
+      this.rawSecret,
+      'encrypt',
+      null,
+      null,
+      fileSize
+    );
     return {
       stream: ece.transform(),
       streamInfo: ece.info()

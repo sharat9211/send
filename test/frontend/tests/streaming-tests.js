@@ -3,7 +3,7 @@ require('buffer');
 
 import assert from 'assert';
 import { b64ToArray } from '../../../app/utils';
-import BlobSlicer from '../../../app/blobSlicer';
+import blobStream from '../../../app/blobStream';
 import ECE from '../../../app/ece.js';
 
 const rs = 36;
@@ -48,10 +48,8 @@ describe('Streaming', function() {
     });
 
     it('can decrypt', async function() {
-      const blobStream = new ReadableStream(
-        new BlobSlicer(new Blob([encrypted]), rs)
-      );
-      const ece = new ECE(blobStream, key, 'decrypt', rs);
+      const stream = blobStream(new Blob([encrypted]), rs);
+      const ece = new ECE(stream, key, 'decrypt', rs);
       const decStream = await ece.transform();
 
       const reader = decStream.getReader();

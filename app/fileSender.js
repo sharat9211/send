@@ -4,6 +4,7 @@ import OwnedFile from './ownedFile';
 import Keychain from './keychain';
 import { arrayToB64, bytes } from './utils';
 import { uploadWs } from './api';
+import Archive from './archive';
 
 export default class FileSender extends Nanobus {
   constructor(file) {
@@ -64,8 +65,8 @@ export default class FileSender extends Nanobus {
     }
     this.msg = 'encryptingFile';
     this.emit('encrypting');
-
-    const enc = await this.keychain.encryptStream(this.file);
+    const source = this.file instanceof Archive ? this.file.stream : this.file;
+    const enc = await this.keychain.encryptStream(source, this.file.size);
     const metadata = await this.keychain.encryptMetadata(this.file);
     const authKeyB64 = await this.keychain.authKeyB64();
 

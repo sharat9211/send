@@ -78,7 +78,8 @@ export async function metadata(id, keychain) {
       ttl: data.ttl,
       iv: meta.iv,
       name: meta.name,
-      type: meta.type
+      type: meta.type,
+      manifest: meta.manifest
     };
   }
   throw new Error(result.response.status);

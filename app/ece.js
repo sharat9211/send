@@ -1,5 +1,5 @@
 import 'buffer';
-import BlobSlicer from './blobSlicer';
+import blobStream from './blobStream';
 import { transformStream } from './streams';
 
 const NONCE_LENGTH = 12;
@@ -290,16 +290,17 @@ rs:   int containing record size, optional
 salt: ArrayBuffer containing salt of KEY_LENGTH length, optional
 */
 export default class ECE {
-  constructor(input, key, mode, rs, salt) {
+  constructor(input, key, mode, rs, salt, fileSize) {
     this.input = input;
     this.key = key;
     this.mode = mode;
     this.rs = rs;
     this.salt = salt;
-    if (rs === undefined) {
+    this.fileSize = fileSize;
+    if (!rs) {
       this.rs = RS;
     }
-    if (salt === undefined) {
+    if (!salt) {
       this.salt = generateSalt(KEY_LENGTH);
     }
   }
@@ -308,7 +309,7 @@ export default class ECE {
     return {
       recordSize: this.rs,
       fileSize:
-        21 + this.input.size + 16 * Math.floor(this.input.size / (this.rs - 17))
+        21 + this.fileSize + 16 * Math.floor(this.fileSize / (this.rs - 17))
     };
   }
 
@@ -316,9 +317,7 @@ export default class ECE {
     let inputStream;
 
     if (this.input instanceof Blob) {
-      inputStream = new ReadableStream(
-        new BlobSlicer(this.input, this.rs - 17)
-      );
+      inputStream = blobStream(this.input, this.rs - 17);
     } else {
       inputStream = transformStream(
         this.input,
